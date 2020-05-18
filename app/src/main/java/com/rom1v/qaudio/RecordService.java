@@ -48,7 +48,7 @@ public class RecordService extends Service {
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, getString(R.string.app_name), NotificationManager.IMPORTANCE_DEFAULT);
         getNotificationManager().createNotificationChannel(channel);
 
-        startForeground(0, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
+        startForeground(43215, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
     }
 
     @Override
@@ -77,16 +77,23 @@ public class RecordService extends Service {
         AudioPlaybackCaptureConfiguration.Builder builder = new AudioPlaybackCaptureConfiguration.Builder(mediaProjection);
         builder.addMatchingUsage(AudioAttributes.USAGE_MEDIA);
         AudioPlaybackCaptureConfiguration config = builder.build();
-        final AudioRecord recorder = new AudioRecord.Builder().setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION).setAudioFormat(
+        final AudioRecord recorder = new AudioRecord.Builder().setAudioFormat(
                 new AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(48000).setChannelMask(AudioFormat.CHANNEL_IN_MONO)
                         .build()).setBufferSizeInBytes(2 * 1024 * 1024).setAudioPlaybackCaptureConfig(config).build();
         recorder.startRecording();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                byte[] buf = new byte[1024];
-                int r = recorder.read(buf, 0, buf.length);
-                Log.d(TAG, "read = " + r);
+                while(true) {
+                    byte[] buf = new byte[1024];
+                    int r = recorder.read(buf, 0, buf.length);
+                    Log.d(TAG, "read = " + (new String(buf)));
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }).start();
     }
